@@ -1,0 +1,267 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bc-blue: #0078d4;
+    --bc-blue-dark: #005a9e;
+    --bc-blue-light: #deecf9;
+    --bc-bg: #f5f5f5;
+    --bc-border: #e1e1e1;
+    --bc-text: #1b1b1b;
+    --bc-text-secondary: #605e5c;
+  }
+
+  body {
+    font-family: 'Segoe UI', 'Segoe UI Web (West European)', -apple-system,
+      BlinkMacSystemFont, Roboto, 'Helvetica Neue', sans-serif;
+    font-size: 13px;
+    background-color: var(--bc-bg);
+    color: var(--bc-text);
+    line-height: 1.4;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  .bc-input {
+    @apply h-6 w-full border border-gray-300 px-1.5 text-xs outline-none transition-colors;
+    font-size: 12px;
+    line-height: 24px;
+  }
+  .bc-input:focus {
+    @apply border-[#0078d4];
+    box-shadow: 0 0 0 1px #0078d4;
+  }
+  .bc-input:disabled {
+    @apply bg-gray-100 text-gray-500;
+  }
+
+  .bc-label {
+    @apply text-xs font-medium text-gray-600;
+    font-size: 12px;
+  }
+
+  .bc-btn {
+    @apply inline-flex h-7 items-center justify-center gap-1 border px-3 text-xs font-medium transition-colors;
+    font-size: 12px;
+    line-height: 28px;
+  }
+  .bc-btn-primary {
+    @apply bc-btn border-[#0078d4] bg-[#0078d4] text-white;
+  }
+  .bc-btn-primary:hover {
+    @apply bg-[#005a9e];
+  }
+  .bc-btn-secondary {
+    @apply bc-btn border-gray-300 bg-white text-gray-700;
+  }
+  .bc-btn-secondary:hover {
+    @apply bg-gray-100;
+  }
+  .bc-btn-danger {
+    @apply bc-btn border-red-500 bg-red-500 text-white;
+  }
+  .bc-btn-danger:hover {
+    @apply bg-red-600;
+  }
+
+  .bc-table {
+    @apply w-full border-collapse text-xs;
+    font-size: 12px;
+  }
+  .bc-table th {
+    @apply border border-gray-300 bg-gray-100 px-2 py-1 text-left font-semibold text-gray-700;
+    font-size: 12px;
+    height: 28px;
+  }
+  .bc-table td {
+    @apply border border-gray-200 px-2 py-1;
+    font-size: 12px;
+    height: 24px;
+  }
+  .bc-table tbody tr:hover {
+    @apply bg-blue-50;
+  }
+  .bc-table tbody tr.selected {
+    @apply bg-blue-100;
+  }
+
+  .bc-card {
+    @apply bg-white border border-gray-200;
+  }
+
+  .bc-badge {
+    @apply inline-flex items-center gap-1 px-1.5 py-0.5 text-xs font-medium;
+    font-size: 11px;
+  }
+  .bc-badge-success {
+    @apply bc-badge bg-green-100 text-green-700;
+  }
+  .bc-badge-warning {
+    @apply bc-badge bg-amber-100 text-amber-700;
+  }
+  .bc-badge-danger {
+    @apply bc-badge bg-red-100 text-red-700;
+  }
+  .bc-badge-info {
+    @apply bc-badge bg-blue-100 text-blue-700;
+  }
+  .bc-badge-gray {
+    @apply bc-badge bg-gray-100 text-gray-600;
+  }
+
+  .bc-nav-item {
+    @apply flex items-center gap-2 px-3 py-1.5 text-xs text-white transition-colors;
+    font-size: 12px;
+  }
+  .bc-nav-item:hover {
+    @apply bg-[#005a9e];
+  }
+  .bc-nav-item.active {
+    @apply bg-[#005a9e];
+  }
+
+  .bc-sidebar-item {
+    @apply flex items-center gap-2 px-3 py-1.5 text-xs text-gray-700 transition-colors cursor-pointer;
+    font-size: 12px;
+  }
+  .bc-sidebar-item:hover {
+    @apply bg-blue-50 text-[#0078d4];
+  }
+  .bc-sidebar-item.active {
+    @apply bg-blue-50 text-[#0078d4] border-l-2 border-[#0078d4];
+  }
+
+  .top-menu-button {
+    @apply h-full px-2.5 text-xs font-medium text-white/90 transition-colors;
+    font-size: 12px;
+    line-height: 40px;
+  }
+  .top-menu-button:hover {
+    @apply bg-white/15 text-white;
+  }
+
+  .system-tab {
+    @apply flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 border border-transparent border-b-0 transition-colors whitespace-nowrap;
+    font-size: 12px;
+  }
+  .system-tab:hover {
+    @apply text-[#0078d4] bg-white;
+  }
+  .system-tab.active {
+    @apply bg-white text-[#0078d4] border-gray-300;
+  }
+
+  .system-section {
+    @apply bg-white border border-slate-200;
+  }
+  .system-section h2 {
+    @apply text-xs font-semibold text-slate-700 bg-slate-50 px-3 py-1.5 border-b border-slate-200 flex items-center gap-1.5;
+    font-size: 12px;
+  }
+
+  .system-control-shell {
+    @apply max-w-6xl mx-auto bg-white border border-slate-200 shadow-sm overflow-hidden;
+  }
+  .system-control-header {
+    @apply bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] text-white px-5 py-4 flex items-center justify-between;
+  }
+  .system-control-header h1 {
+    @apply text-base font-bold;
+  }
+  .system-control-header p {
+    @apply text-[11px] text-slate-300 mt-0.5;
+  }
+  .system-eyebrow {
+    @apply text-[10px] uppercase tracking-wider text-[#38bdf8] font-semibold;
+  }
+  .system-control-mark {
+    @apply w-10 h-10 bg-[#0078d4] flex items-center justify-center flex-shrink-0;
+  }
+  .system-health {
+    @apply text-xs text-emerald-300 flex flex-col items-end;
+  }
+  .system-health-dot {
+    @apply inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-pulse;
+  }
+  .system-control-tabs {
+    @apply flex overflow-x-auto border-b border-slate-200 bg-slate-100 px-3 pt-2 gap-1;
+  }
+  .system-control-tab {
+    @apply flex items-center gap-1.5 px-3 py-2 text-xs font-medium text-slate-600 border border-transparent border-b-0 transition-colors whitespace-nowrap cursor-pointer;
+    font-size: 12px;
+  }
+  .system-control-tab:hover {
+    @apply text-[#0078d4] bg-white;
+  }
+  .system-control-tab.active {
+    @apply bg-white text-[#0078d4] border-slate-300 font-semibold;
+  }
+  .system-control-body {
+    @apply p-5 bg-slate-50 min-h-[520px];
+  }
+  .system-control-footer {
+    @apply border-t border-slate-200 bg-white px-5 py-3 flex items-center justify-between text-xs;
+  }
+
+  .policy-picker {
+    @apply inline-flex border border-slate-300 overflow-hidden;
+  }
+  .policy-chip {
+    @apply px-3 py-1 text-[11px] font-medium transition-colors border-r border-slate-300 last:border-r-0;
+  }
+  .policy-chip.allow {
+    @apply bg-slate-50 text-slate-500 hover:bg-emerald-50;
+  }
+  .policy-chip.allow.selected {
+    @apply bg-emerald-500 text-white;
+  }
+  .policy-chip.warn {
+    @apply bg-slate-50 text-slate-500 hover:bg-amber-50;
+  }
+  .policy-chip.warn.selected {
+    @apply bg-amber-500 text-white;
+  }
+  .policy-chip.block {
+    @apply bg-slate-50 text-slate-500 hover:bg-red-50;
+  }
+  .policy-chip.block.selected {
+    @apply bg-red-500 text-white;
+  }
+}
+
+.bc-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.bc-scroll::-webkit-scrollbar-track {
+  background: #f0f0f0;
+}
+.bc-scroll::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border-radius: 4px;
+}
+.bc-scroll::-webkit-scrollbar-thumb:hover {
+  background: #a0a0a0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+.animate-slide-in {
+  animation: slideIn 0.2s ease-out;
+}
