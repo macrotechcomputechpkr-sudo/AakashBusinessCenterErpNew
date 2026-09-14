@@ -91,6 +91,7 @@ export default function ChartOfAccounts() {
   const [selectedAccount, setSelectedAccount] = useState<ChartOfAccount | null>(null);
   const [showTemplate, setShowTemplate] = useState(false);
   const [templateLoading, setTemplateLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (currentCompany) loadData();
@@ -99,12 +100,16 @@ export default function ChartOfAccounts() {
   async function loadData() {
     if (!currentCompany) return;
     setLoading(true);
+    setLoadError(null);
     const { data, error } = await supabase
       .from('chart_of_accounts')
       .select('*')
       .eq('company_id', currentCompany.id)
       .order('account_no');
-    if (!error && data) {
+    if (error) {
+      setLoadError(error.message);
+      setAccounts([]);
+    } else if (data) {
       setAccounts(data as ChartOfAccount[]);
       const roots = (data as ChartOfAccount[]).filter((a) => a.parent_id === null);
       setExpanded(new Set(roots.map((a) => a.id)));
@@ -264,6 +269,17 @@ export default function ChartOfAccounts() {
   }
 
   if (loading) return <div className="p-6 text-xs text-gray-400">Loading chart of accounts...</div>;
+  if (loadError) return (
+    <div className="p-6">
+      <PageHeader title="Chart of Accounts" subtitle="Tree structure of all ledger accounts for this company" />
+      <div className="bc-card mt-3 p-6 text-center">
+        <div className="text-sm text-red-600 font-medium mb-2">Could not load accounts</div>
+        <div className="text-xs text-gray-500 mb-4">{loadError}</div>
+        <button onClick={() => loadData()} className="bc-btn-primary">Retry</button>
+      </div>
+    </div>
+  );
+  if (!currentCompany) return <div className="p-6 text-xs text-gray-400">No company selected.</div>;
 
   return (
     <div className="p-4">
