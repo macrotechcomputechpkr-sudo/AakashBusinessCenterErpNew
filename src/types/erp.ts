@@ -62,6 +62,8 @@ export interface ChartOfAccount {
   parent_id: string | null;
   is_posting: boolean;
   balance: number;
+  description: string | null;
+  is_active: boolean;
   created_at: string;
   children?: ChartOfAccount[];
 }
