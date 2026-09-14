@@ -82,7 +82,7 @@ const NEPAL_TEMPLATE: Omit<ChartOfAccount, 'id' | 'company_id' | 'created_at' | 
 export default function ChartOfAccounts() {
   const { currentCompany } = useAuth();
   const [accounts, setAccounts] = useState<ChartOfAccount[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<AccountType | 'all'>('all');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -94,25 +94,34 @@ export default function ChartOfAccounts() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (currentCompany) loadData();
+    if (currentCompany) {
+      loadData();
+    } else {
+      setLoading(false);
+    }
   }, [currentCompany?.id]);
 
   async function loadData() {
     if (!currentCompany) return;
     setLoading(true);
     setLoadError(null);
-    const { data, error } = await supabase
-      .from('chart_of_accounts')
-      .select('*')
-      .eq('company_id', currentCompany.id)
-      .order('account_no');
-    if (error) {
-      setLoadError(error.message);
+    try {
+      const { data, error } = await supabase
+        .from('chart_of_accounts')
+        .select('*')
+        .eq('company_id', currentCompany.id)
+        .order('account_no');
+      if (error) {
+        setLoadError(error.message);
+        setAccounts([]);
+      } else if (data) {
+        setAccounts(data as ChartOfAccount[]);
+        const roots = (data as ChartOfAccount[]).filter((a) => a.parent_id === null);
+        setExpanded(new Set(roots.map((a) => a.id)));
+      }
+    } catch (err: any) {
+      setLoadError(err?.message || 'Unexpected error loading accounts');
       setAccounts([]);
-    } else if (data) {
-      setAccounts(data as ChartOfAccount[]);
-      const roots = (data as ChartOfAccount[]).filter((a) => a.parent_id === null);
-      setExpanded(new Set(roots.map((a) => a.id)));
     }
     setLoading(false);
   }
