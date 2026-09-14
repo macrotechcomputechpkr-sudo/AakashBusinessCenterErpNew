@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { formatCurrency } from '@/lib/format';
@@ -6,8 +6,7 @@ import type { ChartOfAccount, AccountType } from '@/types/erp';
 import { ACCOUNT_TYPE_LABELS, ACCOUNT_TYPE_COLORS } from '@/types/erp';
 import {
   ChevronRight, ChevronDown, Plus, BookOpen, Wallet, TrendingDown, TrendingUp,
-  DollarSign, Layers, Search, Pencil, Trash2, X, FileText, Download,
-  Building2, ArrowLeft,
+  DollarSign, Layers, Search, Pencil, Trash2, X, FileText, Download, ArrowLeft,
 } from 'lucide-react';
 
 export function PageHeader({ title, subtitle }: { title: string; subtitle?: string }) {
@@ -38,51 +37,47 @@ const TYPE_FILTERS: { key: AccountType | 'all'; label: string }[] = [
   { key: 'expense', label: 'Expenses' },
 ];
 
-const NEPAL_TEMPLATE: Omit<ChartOfAccount, 'id' | 'company_id' | 'created_at' | 'children'>[] = [
-  { account_no: '1000', name: 'Current Assets', type: 'asset', parent_id: null, is_posting: false, balance: 0, description: 'Group for short-term assets', is_active: true },
-  { account_no: '1010', name: 'Cash in Hand', type: 'asset', parent_id: null, is_posting: true, balance: 0, description: 'Physical cash on premises', is_active: true },
-  { account_no: '1020', name: 'Bank Account - NIC Asia', type: 'asset', parent_id: null, is_posting: true, balance: 0, description: 'NIC Asia Bank current account', is_active: true },
-  { account_no: '1030', name: 'Bank Account - Global IME', type: 'asset', parent_id: null, is_posting: true, balance: 0, description: 'Global IME Bank current account', is_active: true },
-  { account_no: '1100', name: 'Accounts Receivable', type: 'asset', parent_id: null, is_posting: true, balance: 0, description: 'Money owed by customers', is_active: true },
-  { account_no: '1200', name: 'TDS Receivable', type: 'asset', parent_id: null, is_posting: true, balance: 0, description: 'TDS deducted at source, recoverable', is_active: true },
-  { account_no: '1500', name: 'Inventory', type: 'asset', parent_id: null, is_posting: true, balance: 0, description: 'Goods in stock', is_active: true },
-  { account_no: '1600', name: 'Fixed Assets', type: 'asset', parent_id: null, is_posting: false, balance: 0, description: 'Group for long-term assets', is_active: true },
-  { account_no: '1610', name: 'Office Equipment', type: 'asset', parent_id: null, is_posting: true, balance: 0, description: 'Computers, furniture, etc.', is_active: true },
-  { account_no: '1620', name: 'Accumulated Depreciation', type: 'asset', parent_id: null, is_posting: true, balance: 0, description: 'Contra-asset for depreciation', is_active: true },
-
-  { account_no: '2000', name: 'Current Liabilities', type: 'liability', parent_id: null, is_posting: false, balance: 0, description: 'Group for short-term liabilities', is_active: true },
-  { account_no: '2010', name: 'Accounts Payable', type: 'liability', parent_id: null, is_posting: true, balance: 0, description: 'Money owed to suppliers', is_active: true },
-  { account_no: '2020', name: 'VAT Payable (13%)', type: 'liability', parent_id: null, is_posting: true, balance: 0, description: 'VAT collected, payable to IRD', is_active: true },
-  { account_no: '2030', name: 'TDS Payable', type: 'liability', parent_id: null, is_posting: true, balance: 0, description: 'TDS deducted, payable to IRD', is_active: true },
-  { account_no: '2040', name: 'Salary Payable', type: 'liability', parent_id: null, is_posting: true, balance: 0, description: 'Salaries owed to employees', is_active: true },
-  { account_no: '2050', name: 'Excise Duty Payable', type: 'liability', parent_id: null, is_posting: true, balance: 0, description: 'Excise duty owed to customs', is_active: true },
-
-  { account_no: '3000', name: 'Equity', type: 'equity', parent_id: null, is_posting: false, balance: 0, description: 'Group for owner equity', is_active: true },
-  { account_no: '3010', name: 'Owner Capital', type: 'equity', parent_id: null, is_posting: true, balance: 0, description: 'Initial and additional capital invested', is_active: true },
-  { account_no: '3020', name: 'Retained Earnings', type: 'equity', parent_id: null, is_posting: true, balance: 0, description: 'Accumulated profits', is_active: true },
-  { account_no: '3030', name: 'Drawings', type: 'equity', parent_id: null, is_posting: true, balance: 0, description: 'Owner withdrawals', is_active: true },
-
-  { account_no: '4000', name: 'Revenue', type: 'revenue', parent_id: null, is_posting: false, balance: 0, description: 'Group for income accounts', is_active: true },
-  { account_no: '4010', name: 'Sales Revenue', type: 'revenue', parent_id: null, is_posting: true, balance: 0, description: 'Income from goods sold', is_active: true },
-  { account_no: '4020', name: 'Sales Returns', type: 'revenue', parent_id: null, is_posting: true, balance: 0, description: 'Returned goods (contra-revenue)', is_active: true },
-  { account_no: '4030', name: 'Service Income', type: 'revenue', parent_id: null, is_posting: true, balance: 0, description: 'Income from services rendered', is_active: true },
-  { account_no: '4040', name: 'Interest Income', type: 'revenue', parent_id: null, is_posting: true, balance: 0, description: 'Bank interest earned', is_active: true },
-
-  { account_no: '5000', name: 'Operating Expenses', type: 'expense', parent_id: null, is_posting: false, balance: 0, description: 'Group for expense accounts', is_active: true },
-  { account_no: '5010', name: 'Cost of Goods Sold', type: 'expense', parent_id: null, is_posting: true, balance: 0, description: 'Direct cost of items sold', is_active: true },
-  { account_no: '5020', name: 'Rent Expense', type: 'expense', parent_id: null, is_posting: true, balance: 0, description: 'Office/shop rent', is_active: true },
-  { account_no: '5030', name: 'Salary Expense', type: 'expense', parent_id: null, is_posting: true, balance: 0, description: 'Employee salaries', is_active: true },
-  { account_no: '5040', name: 'Utility Expense', type: 'expense', parent_id: null, is_posting: true, balance: 0, description: 'Electricity, water, internet', is_active: true },
-  { account_no: '5050', name: 'Transportation Expense', type: 'expense', parent_id: null, is_posting: true, balance: 0, description: 'Delivery and travel costs', is_active: true },
-  { account_no: '5060', name: 'Depreciation Expense', type: 'expense', parent_id: null, is_posting: true, balance: 0, description: 'Periodic depreciation', is_active: true },
-  { account_no: '5070', name: 'Bank Charges', type: 'expense', parent_id: null, is_posting: true, balance: 0, description: 'Bank fees and commissions', is_active: true },
-  { account_no: '5080', name: 'Office Supplies', type: 'expense', parent_id: null, is_posting: true, balance: 0, description: 'Stationery and consumables', is_active: true },
+const NEPAL_TEMPLATE: { account_no: string; name: string; type: AccountType; is_posting: boolean; description: string }[] = [
+  { account_no: '1000', name: 'Current Assets', type: 'asset', is_posting: false, description: 'Group for short-term assets' },
+  { account_no: '1010', name: 'Cash in Hand', type: 'asset', is_posting: true, description: 'Physical cash on premises' },
+  { account_no: '1020', name: 'Bank Account - NIC Asia', type: 'asset', is_posting: true, description: 'NIC Asia Bank current account' },
+  { account_no: '1030', name: 'Bank Account - Global IME', type: 'asset', is_posting: true, description: 'Global IME Bank current account' },
+  { account_no: '1100', name: 'Accounts Receivable', type: 'asset', is_posting: true, description: 'Money owed by customers' },
+  { account_no: '1200', name: 'TDS Receivable', type: 'asset', is_posting: true, description: 'TDS deducted at source, recoverable' },
+  { account_no: '1500', name: 'Inventory', type: 'asset', is_posting: true, description: 'Goods in stock' },
+  { account_no: '1600', name: 'Fixed Assets', type: 'asset', is_posting: false, description: 'Group for long-term assets' },
+  { account_no: '1610', name: 'Office Equipment', type: 'asset', is_posting: true, description: 'Computers, furniture, etc.' },
+  { account_no: '1620', name: 'Accumulated Depreciation', type: 'asset', is_posting: true, description: 'Contra-asset for depreciation' },
+  { account_no: '2000', name: 'Current Liabilities', type: 'liability', is_posting: false, description: 'Group for short-term liabilities' },
+  { account_no: '2010', name: 'Accounts Payable', type: 'liability', is_posting: true, description: 'Money owed to suppliers' },
+  { account_no: '2020', name: 'VAT Payable (13%)', type: 'liability', is_posting: true, description: 'VAT collected, payable to IRD' },
+  { account_no: '2030', name: 'TDS Payable', type: 'liability', is_posting: true, description: 'TDS deducted, payable to IRD' },
+  { account_no: '2040', name: 'Salary Payable', type: 'liability', is_posting: true, description: 'Salaries owed to employees' },
+  { account_no: '2050', name: 'Excise Duty Payable', type: 'liability', is_posting: true, description: 'Excise duty owed to customs' },
+  { account_no: '3000', name: 'Equity', type: 'equity', is_posting: false, description: 'Group for owner equity' },
+  { account_no: '3010', name: 'Owner Capital', type: 'equity', is_posting: true, description: 'Initial and additional capital invested' },
+  { account_no: '3020', name: 'Retained Earnings', type: 'equity', is_posting: true, description: 'Accumulated profits' },
+  { account_no: '3030', name: 'Drawings', type: 'equity', is_posting: true, description: 'Owner withdrawals' },
+  { account_no: '4000', name: 'Revenue', type: 'revenue', is_posting: false, description: 'Group for income accounts' },
+  { account_no: '4010', name: 'Sales Revenue', type: 'revenue', is_posting: true, description: 'Income from goods sold' },
+  { account_no: '4020', name: 'Sales Returns', type: 'revenue', is_posting: true, description: 'Returned goods (contra-revenue)' },
+  { account_no: '4030', name: 'Service Income', type: 'revenue', is_posting: true, description: 'Income from services rendered' },
+  { account_no: '4040', name: 'Interest Income', type: 'revenue', is_posting: true, description: 'Bank interest earned' },
+  { account_no: '5000', name: 'Operating Expenses', type: 'expense', is_posting: false, description: 'Group for expense accounts' },
+  { account_no: '5010', name: 'Cost of Goods Sold', type: 'expense', is_posting: true, description: 'Direct cost of items sold' },
+  { account_no: '5020', name: 'Rent Expense', type: 'expense', is_posting: true, description: 'Office/shop rent' },
+  { account_no: '5030', name: 'Salary Expense', type: 'expense', is_posting: true, description: 'Employee salaries' },
+  { account_no: '5040', name: 'Utility Expense', type: 'expense', is_posting: true, description: 'Electricity, water, internet' },
+  { account_no: '5050', name: 'Transportation Expense', type: 'expense', is_posting: true, description: 'Delivery and travel costs' },
+  { account_no: '5060', name: 'Depreciation Expense', type: 'expense', is_posting: true, description: 'Periodic depreciation' },
+  { account_no: '5070', name: 'Bank Charges', type: 'expense', is_posting: true, description: 'Bank fees and commissions' },
+  { account_no: '5080', name: 'Office Supplies', type: 'expense', is_posting: true, description: 'Stationery and consumables' },
 ];
 
 export default function ChartOfAccounts() {
   const { currentCompany } = useAuth();
   const [accounts, setAccounts] = useState<ChartOfAccount[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<AccountType | 'all'>('all');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -126,26 +121,6 @@ export default function ChartOfAccounts() {
     setLoading(false);
   }
 
-  const tree = useMemo(() => buildTree(accounts), [accounts]);
-
-  const filteredTree = useMemo(() => {
-    if (typeFilter === 'all' && !search) return tree;
-    const q = search.toLowerCase();
-    return tree
-      .map((node) => filterNode(node, typeFilter, q))
-      .filter(Boolean) as ChartOfAccount[];
-  }, [tree, typeFilter, search]);
-
-  const stats = useMemo(() => {
-    const byType: Record<string, { count: number; balance: number }> = {};
-    for (const a of accounts) {
-      if (!byType[a.type]) byType[a.type] = { count: 0, balance: 0 };
-      byType[a.type].count++;
-      if (a.is_posting) byType[a.type].balance += Number(a.balance);
-    }
-    return byType;
-  }, [accounts]);
-
   function buildTree(flat: ChartOfAccount[]): ChartOfAccount[] {
     const map = new Map<string, ChartOfAccount>();
     const roots: ChartOfAccount[] = [];
@@ -170,6 +145,22 @@ export default function ChartOfAccounts() {
     return null;
   }
 
+  const tree = buildTree(accounts);
+  let filteredTree = tree;
+  if (typeFilter !== 'all' || search) {
+    const q = search.toLowerCase();
+    filteredTree = tree
+      .map((node) => filterNode(node, typeFilter, q))
+      .filter(Boolean) as ChartOfAccount[];
+  }
+
+  const stats: Record<string, { count: number; balance: number }> = {};
+  for (const a of accounts) {
+    if (!stats[a.type]) stats[a.type] = { count: 0, balance: 0 };
+    stats[a.type].count++;
+    if (a.is_posting) stats[a.type].balance += Number(a.balance);
+  }
+
   function toggleExpand(id: string) {
     setExpanded((prev) => {
       const next = new Set(prev);
@@ -177,14 +168,6 @@ export default function ChartOfAccounts() {
       else next.add(id);
       return next;
     });
-  }
-
-  function expandAll() {
-    setExpanded(new Set(accounts.map((a) => a.id)));
-  }
-
-  function collapseAll() {
-    setExpanded(new Set());
   }
 
   async function deleteAccount(account: ChartOfAccount) {
@@ -211,7 +194,7 @@ export default function ChartOfAccounts() {
         account_no: t.account_no,
         name: t.name,
         type: t.type,
-        parent_id: t.parent_id,
+        parent_id: null,
         is_posting: t.is_posting,
         balance: 0,
         description: t.description,
@@ -301,7 +284,7 @@ export default function ChartOfAccounts() {
           const Icon = TYPE_ICONS[type];
           return (
             <div key={type} className="bc-card p-3 flex items-center gap-2.5">
-              <div className={`w-8 h-8 flex items-center justify-center bg-gray-50`}>
+              <div className="w-8 h-8 flex items-center justify-center bg-gray-50">
                 <Icon className={`w-4 h-4 ${ACCOUNT_TYPE_COLORS[type]}`} />
               </div>
               <div>
@@ -347,8 +330,8 @@ export default function ChartOfAccounts() {
           </select>
 
           <div className="flex items-center gap-1 ml-auto">
-            <button onClick={expandAll} className="bc-btn-secondary text-[11px]">Expand All</button>
-            <button onClick={collapseAll} className="bc-btn-secondary text-[11px]">Collapse All</button>
+            <button onClick={() => setExpanded(new Set(accounts.map((a) => a.id)))} className="bc-btn-secondary text-[11px]">Expand All</button>
+            <button onClick={() => setExpanded(new Set())} className="bc-btn-secondary text-[11px]">Collapse All</button>
           </div>
         </div>
 
