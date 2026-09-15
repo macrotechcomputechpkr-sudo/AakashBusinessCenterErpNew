@@ -340,20 +340,15 @@ export default function ChartOfAccounts() {
           </div>
         )}
 
-        {/* Add/Edit form modal */}
+        {/* Add/Edit form */}
         {showForm && (
-          <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 px-4" onClick={() => { setShowForm(false); setEditingAccount(null); }}>
-            <div className="fixed inset-0 bg-black/40" />
-            <div className="relative bg-white shadow-2xl border border-gray-300 w-full max-w-3xl animate-fade-in" onClick={(e) => e.stopPropagation()}>
-              <AccountForm
-                currentCompany={currentCompany}
-                accounts={accounts}
-                editing={editingAccount}
-                onDone={() => { setShowForm(false); setEditingAccount(null); loadData(); }}
-                onCancel={() => { setShowForm(false); setEditingAccount(null); }}
-              />
-            </div>
-          </div>
+          <AccountForm
+            currentCompany={currentCompany}
+            accounts={accounts}
+            editing={editingAccount}
+            onDone={() => { setShowForm(false); setEditingAccount(null); loadData(); }}
+            onCancel={() => { setShowForm(false); setEditingAccount(null); }}
+          />
         )}
 
         {/* Tree header */}
@@ -468,15 +463,16 @@ function AccountForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-4 bg-white">
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-semibold text-gray-800">
-          {editing ? `Edit: ${editing.account_no} - ${editing.name}` : 'Create New Account'}
+    <div className="border-b border-gray-300 bg-blue-50">
+      <div className="px-4 py-2 bg-[#0078d4] text-white flex items-center justify-between">
+        <span className="text-sm font-semibold">
+          {editing ? `Edit Account: ${editing.account_no} - ${editing.name}` : 'Create New Account'}
         </span>
-        <button type="button" onClick={onCancel} className="p-1 hover:bg-gray-200 rounded">
-          <X className="w-4 h-4 text-gray-500" />
+        <button type="button" onClick={onCancel} className="p-1 hover:bg-white/20 rounded">
+          <X className="w-4 h-4 text-white" />
         </button>
       </div>
+      <form onSubmit={handleSubmit} className="p-4">
       {error && <div className="text-xs text-red-600 mb-3 bg-red-50 border border-red-200 px-3 py-2">{error}</div>}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <div>
@@ -527,7 +523,8 @@ function AccountForm({
           {saving ? 'Saving...' : editing ? 'Update' : 'Save'}
         </button>
       </div>
-    </form>
+      </form>
+    </div>
   );
 }
 
