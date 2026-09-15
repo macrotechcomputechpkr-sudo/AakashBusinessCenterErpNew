@@ -77,7 +77,7 @@ const NEPAL_TEMPLATE: { account_no: string; name: string; type: AccountType; is_
 export default function ChartOfAccounts() {
   const { currentCompany } = useAuth();
   const [accounts, setAccounts] = useState<ChartOfAccount[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<AccountType | 'all'>('all');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
@@ -91,8 +91,6 @@ export default function ChartOfAccounts() {
   useEffect(() => {
     if (currentCompany) {
       loadData();
-    } else {
-      setLoading(false);
     }
   }, [currentCompany?.id]);
 
@@ -260,17 +258,6 @@ export default function ChartOfAccounts() {
     );
   }
 
-  if (loading) return <div className="p-6 text-xs text-gray-400">Loading chart of accounts...</div>;
-  if (loadError) return (
-    <div className="p-6">
-      <PageHeader title="Chart of Accounts" subtitle="Tree structure of all ledger accounts for this company" />
-      <div className="bc-card mt-3 p-6 text-center">
-        <div className="text-sm text-red-600 font-medium mb-2">Could not load accounts</div>
-        <div className="text-xs text-gray-500 mb-4">{loadError}</div>
-        <button onClick={() => loadData()} className="bc-btn-primary">Retry</button>
-      </div>
-    </div>
-  );
   if (!currentCompany) return <div className="p-6 text-xs text-gray-400">No company selected.</div>;
 
   return (
@@ -353,15 +340,20 @@ export default function ChartOfAccounts() {
           </div>
         )}
 
-        {/* Add/Edit form */}
+        {/* Add/Edit form modal */}
         {showForm && (
-          <AccountForm
-            currentCompany={currentCompany}
-            accounts={accounts}
-            editing={editingAccount}
-            onDone={() => { setShowForm(false); setEditingAccount(null); loadData(); }}
-            onCancel={() => { setShowForm(false); setEditingAccount(null); }}
-          />
+          <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 px-4" onClick={() => { setShowForm(false); setEditingAccount(null); }}>
+            <div className="fixed inset-0 bg-black/40" />
+            <div className="relative bg-white shadow-2xl border border-gray-300 w-full max-w-3xl animate-fade-in" onClick={(e) => e.stopPropagation()}>
+              <AccountForm
+                currentCompany={currentCompany}
+                accounts={accounts}
+                editing={editingAccount}
+                onDone={() => { setShowForm(false); setEditingAccount(null); loadData(); }}
+                onCancel={() => { setShowForm(false); setEditingAccount(null); }}
+              />
+            </div>
+          </div>
         )}
 
         {/* Tree header */}
@@ -377,7 +369,14 @@ export default function ChartOfAccounts() {
 
         {/* Tree body */}
         <div className="max-h-[55vh] overflow-y-auto bc-scroll">
-          {filteredTree.length === 0 ? (
+          {loading ? (
+            <div className="py-8 text-center text-xs text-gray-400">Loading accounts...</div>
+          ) : loadError ? (
+            <div className="py-8 text-center">
+              <div className="text-xs text-red-600 mb-2">{loadError}</div>
+              <button onClick={() => loadData()} className="bc-btn-primary">Retry</button>
+            </div>
+          ) : filteredTree.length === 0 ? (
             <div className="py-8 text-center text-xs text-gray-400">
               {accounts.length === 0
                 ? 'No accounts yet. Click "Nepal Template" to load the standard set, or "New Account" to create one.'
@@ -469,17 +468,17 @@ function AccountForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-3 border-b border-gray-200 bg-blue-50/50 animate-fade-in">
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold text-gray-700">
+    <form onSubmit={handleSubmit} className="p-4 bg-white">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-sm font-semibold text-gray-800">
           {editing ? `Edit: ${editing.account_no} - ${editing.name}` : 'Create New Account'}
         </span>
         <button type="button" onClick={onCancel} className="p-1 hover:bg-gray-200 rounded">
-          <X className="w-3.5 h-3.5 text-gray-500" />
+          <X className="w-4 h-4 text-gray-500" />
         </button>
       </div>
-      {error && <div className="text-xs text-red-600 mb-2">{error}</div>}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
+      {error && <div className="text-xs text-red-600 mb-3 bg-red-50 border border-red-200 px-3 py-2">{error}</div>}
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         <div>
           <label className="bc-label">Account No</label>
           <input className="bc-input" value={accountNo} onChange={(e) => setAccountNo(e.target.value)} placeholder="e.g. 1030" />
@@ -522,7 +521,7 @@ function AccountForm({
           <input className="bc-input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Notes about this account" />
         </div>
       </div>
-      <div className="flex justify-end gap-2 mt-2">
+      <div className="flex justify-end gap-2 mt-4 pt-3 border-t border-gray-100">
         <button type="button" onClick={onCancel} className="bc-btn-secondary">Cancel</button>
         <button type="submit" disabled={saving} className="bc-btn-primary">
           {saving ? 'Saving...' : editing ? 'Update' : 'Save'}
