@@ -52,6 +52,11 @@ export interface Branch {
 }
 
 export type AccountType = 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
+export type DebitCredit = 'debit' | 'credit';
+export type AccountSubType =
+  | 'cash' | 'bank' | 'receivable' | 'payable' | 'inventory' | 'fixed_asset'
+  | 'accumulated_dep' | 'tax' | 'equity_capital' | 'retained_earnings'
+  | 'sales' | 'purchase' | 'salary' | 'rent' | 'utility' | 'transport' | 'other';
 
 export interface ChartOfAccount {
   id: string;
@@ -66,6 +71,16 @@ export interface ChartOfAccount {
   is_active: boolean;
   created_at: string;
   children?: ChartOfAccount[];
+  opening_balance: number;
+  debit_credit: DebitCredit;
+  sub_type: AccountSubType | null;
+  tax_rate: number;
+  is_tax_account: boolean;
+  currency: string | null;
+  budget_amount: number;
+  is_reconcilable: boolean;
+  cost_center: string | null;
+  is_blocked: boolean;
 }
 
 export interface Customer {
@@ -107,7 +122,75 @@ export interface Item {
   reorder_point: number;
   quantity_on_hand: number;
   created_at: string;
+  uom: string;
+  item_type: 'goods' | 'service' | 'non-inventory' | 'assembly';
+  hsn_code: string | null;
+  barcode: string | null;
+  tax_category: 'standard' | 'zero_rated' | 'exempt' | 'nil_rated' | 'special';
+  gst_rate: number;
+  mrp: number;
+  wholesale_price: number;
+  discount_percent: number;
+  brand: string | null;
+  valuation_method: 'fifo' | 'lifo' | 'weighted_avg' | 'standard_cost';
+  weight: number | null;
+  weight_unit: string | null;
+  min_stock: number;
+  max_stock: number;
+  reorder_qty: number;
+  opening_stock: number;
+  batch_tracked: boolean;
+  expiry_tracked: boolean;
+  supplier_id: string | null;
+  is_active: boolean;
 }
+
+export const ITEM_TYPE_LABELS: Record<string, string> = {
+  goods: 'Goods / Inventory',
+  service: 'Service',
+  'non-inventory': 'Non-Inventory',
+  assembly: 'Assembly / BOM',
+};
+
+export const TAX_CATEGORY_LABELS: Record<string, string> = {
+  standard: 'Standard (13% VAT)',
+  zero_rated: 'Zero Rated',
+  exempt: 'Exempt',
+  nil_rated: 'Nil Rated',
+  special: 'Special Rate',
+};
+
+export const VALUATION_METHOD_LABELS: Record<string, string> = {
+  fifo: 'FIFO (First In First Out)',
+  lifo: 'LIFO (Last In First Out)',
+  weighted_avg: 'Weighted Average',
+  standard_cost: 'Standard Cost',
+};
+
+export const UOM_OPTIONS = [
+  'PCS', 'KG', 'G', 'LTR', 'ML', 'BOX', 'PKT', 'DOZEN', 'SET', 'MTR', 'CM',
+  'SQM', 'CUB_M', 'ROLL', 'BAG', 'BOTTLE', 'PAIR', 'CARTON', 'BUNDLE', 'NOS',
+];
+
+export const ACCOUNT_SUB_TYPE_LABELS: Record<string, string> = {
+  cash: 'Cash',
+  bank: 'Bank',
+  receivable: 'Accounts Receivable',
+  payable: 'Accounts Payable',
+  inventory: 'Inventory',
+  fixed_asset: 'Fixed Asset',
+  accumulated_dep: 'Accumulated Depreciation',
+  tax: 'Tax / VAT',
+  equity_capital: 'Equity Capital',
+  retained_earnings: 'Retained Earnings',
+  sales: 'Sales Revenue',
+  purchase: 'Purchase / COGS',
+  salary: 'Salary & Wages',
+  rent: 'Rent',
+  utility: 'Utilities',
+  transport: 'Transportation',
+  other: 'Other',
+};
 
 export interface Warehouse {
   id: string;
